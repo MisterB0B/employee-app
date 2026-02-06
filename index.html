@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>The Light Park | Employee</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface2: #1a1a25;
+      --border: #2a2a3a;
+      --text: #f0f0f5;
+      --text-dim: #8888a0;
+      --purple: #a855f7;
+      --teal: #06d6a0;
+      --pink: #ec4899;
+      --red: #ef4444;
+      --orange: #f97316;
+      --green: #22c55e;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    /* Splash Screen */
+    #splash {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100vh;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s;
+    }
+    #splash.hidden { opacity: 0; pointer-events: none; }
+    #splash img { max-width: 70%; max-height: 30vh; margin-bottom: 20px; }
+    .splash-text { color: var(--text-dim); font-size: 14px; }
+    
+    /* Header */
+    .header {
+      background: var(--surface);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    
+    .user-info { flex: 1; }
+    .user-name { font-weight: 700; font-size: 18px; }
+    .user-role { font-size: 13px; color: var(--text-dim); }
+    
+    .clock-status {
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .clock-status.in { background: rgba(34, 197, 94, 0.2); color: var(--green); }
+    .clock-status.out { background: rgba(239, 68, 68, 0.2); color: var(--red); }
+    
+    /* Clock In Button */
+    .clock-section {
+      padding: 24px 20px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .clock-btn {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: 4px solid var(--green);
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--green);
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+    
+    .clock-btn:hover {
+      background: rgba(34, 197, 94, 0.2);
+      transform: scale(1.05);
+    }
+    
+    .clock-btn.clocked-in {
+      border-color: var(--red);
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--red);
+    }
+    
+    .clock-time {
+      font-size: 32px;
+      margin-bottom: 4px;
+    }
+    
+    .clock-label {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+    
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 14px;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--purple); border-bottom-color: var(--purple); }
+    
+    /* Content */
+    .content {
+      padding: 20px;
+    }
+    
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* Schedule Card */
+    .schedule-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    
+    .schedule-date {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    
+    .schedule-today {
+      color: var(--teal);
+    }
+    
+    .schedule-time {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .schedule-details {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+    
+    .schedule-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+    
+    .schedule-badge.today { background: rgba(6, 214, 160, 0.2); color: var(--teal); }
+    .schedule-badge.upcoming { background: var(--surface2); color: var(--text-dim); }
+    
+    /* Hours Card */
+    .hours-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    
+    .hours-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .hours-title { font-weight: 700; }
+    .hours-period { font-size: 13px; color: var(--text-dim); }
+    
+    .hours-big {
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--teal);
+      margin-bottom: 8px;
+    }
+    
+    .hours-label {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+    
+    .hours-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    
+    .hours-row:last-child { border-bottom: none; }
+    
+    /* Rewards Section */
+    .rewards-card {
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .rewards-card::before {
+      content: "🏆";
+      position: absolute;
+      right: -10px;
+      top: -10px;
+      font-size: 80px;
+      opacity: 0.2;
+    }
+    
+    .rewards-label { font-size: 13px; opacity: 0.9; margin-bottom: 4px; }
+    .rewards-amount { font-size: 36px; font-weight: 700; margin-bottom: 8px; }
+    .rewards-detail { font-size: 13px; opacity: 0.8; }
+    
+    .my-rank {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    
+    .rank-number {
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--teal);
+    }
+    
+    .rank-label {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+    
+    .challenge-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    
+    .challenge-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    
+    .challenge-icon { font-size: 28px; }
+    .challenge-title { font-weight: 700; flex: 1; }
+    .challenge-reward { color: var(--teal); font-weight: 700; }
+    
+    .challenge-progress {
+      height: 8px;
+      background: var(--surface2);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    
+    .challenge-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--teal), var(--green));
+      border-radius: 4px;
+    }
+    
+    .challenge-status {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    
+    /* Updates Section */
+    .update-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      gap: 12px;
+    }
+    
+    .update-icon { font-size: 20px; }
+    .update-text { flex: 1; }
+    .update-title { font-weight: 600; margin-bottom: 4px; }
+    .update-body { font-size: 13px; color: var(--text-dim); }
+    .update-time { font-size: 11px; color: var(--text-dim); white-space: nowrap; }
+    
+    /* Paycor Link */
+    .paycor-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .paycor-card:hover { background: var(--surface2); }
+    
+    .paycor-logo {
+      width: 48px;
+      height: 48px;
+      background: #00a0df;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    
+    .paycor-text { flex: 1; }
+    .paycor-title { font-weight: 700; }
+    .paycor-desc { font-size: 13px; color: var(--text-dim); }
+    .paycor-arrow { font-size: 20px; color: var(--text-dim); }
+    
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <!-- Splash -->
+  <div id="splash">
+    <img src="logo.png" alt="The Light Park">
+    <div class="splash-text">Employee Portal</div>
+  </div>
+  
+  <!-- Header -->
+  <div class="header">
+    <div class="avatar">MG</div>
+    <div class="user-info">
+      <div class="user-name">Maria Garcia</div>
+      <div class="user-role">Photo Tent — Katy</div>
+    </div>
+    <div class="clock-status in">● Clocked In</div>
+  </div>
+  
+  <!-- Clock Section -->
+  <div class="clock-section">
+    <button class="clock-btn clocked-in" onclick="toggleClock()">
+      <div class="clock-time" id="currentTime">7:42 PM</div>
+      <div>TAP TO<br>CLOCK OUT</div>
+    </button>
+    <div class="clock-label">Clocked in at 5:02 PM • 2h 40m today</div>
+  </div>
+  
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('schedule')">📅 Schedule</button>
+    <button class="tab" onclick="showTab('hours')">⏱️ Hours</button>
+    <button class="tab" onclick="showTab('rewards')">🏆 Rewards</button>
+    <button class="tab" onclick="showTab('updates')">📢 Updates</button>
+  </div>
+  
+  <!-- Schedule Tab -->
+  <div class="content" id="tab-schedule">
+    <div class="section-title">📅 My Schedule</div>
+    
+    <div class="schedule-card">
+      <div class="schedule-date schedule-today">Today — Friday, Feb 6</div>
+      <div class="schedule-time">5:00 PM - 10:00 PM</div>
+      <div class="schedule-details">📸 Photo Tent • Katy</div>
+      <span class="schedule-badge today">Currently Working</span>
+    </div>
+    
+    <div class="schedule-card">
+      <div class="schedule-date">Tomorrow — Saturday, Feb 7</div>
+      <div class="schedule-time">4:00 PM - 11:00 PM</div>
+      <div class="schedule-details">📸 Photo Tent • Katy</div>
+      <span class="schedule-badge upcoming">7 hours</span>
+    </div>
+    
+    <div class="schedule-card">
+      <div class="schedule-date">Sunday, Feb 8</div>
+      <div class="schedule-time">5:00 PM - 10:00 PM</div>
+      <div class="schedule-details">📸 Photo Tent • Katy</div>
+      <span class="schedule-badge upcoming">5 hours</span>
+    </div>
+    
+    <div class="schedule-card">
+      <div class="schedule-date">Monday, Feb 9</div>
+      <div class="schedule-time">—</div>
+      <div class="schedule-details">Day Off</div>
+    </div>
+  </div>
+  
+  <!-- Hours Tab -->
+  <div class="content hidden" id="tab-hours">
+    <div class="section-title">⏱️ My Hours</div>
+    
+    <div class="paycor-card" onclick="window.open('https://www.paycor.com', '_blank')">
+      <div class="paycor-logo">PC</div>
+      <div class="paycor-text">
+        <div class="paycor-title">View in Paycor</div>
+        <div class="paycor-desc">Full pay stubs, tax docs, benefits</div>
+      </div>
+      <div class="paycor-arrow">→</div>
+    </div>
+    
+    <div class="hours-card">
+      <div class="hours-header">
+        <div class="hours-title">This Pay Period</div>
+        <div class="hours-period">Jan 27 - Feb 9</div>
+      </div>
+      <div class="hours-big">32.5</div>
+      <div class="hours-label">hours worked</div>
+    </div>
+    
+    <div class="hours-card">
+      <div class="hours-header">
+        <div class="hours-title">Recent Shifts</div>
+      </div>
+      <div class="hours-row">
+        <span>Today (in progress)</span>
+        <span style="color: var(--teal);">2h 40m</span>
+      </div>
+      <div class="hours-row">
+        <span>Thu, Feb 5</span>
+        <span>5.0 hrs</span>
+      </div>
+      <div class="hours-row">
+        <span>Wed, Feb 4</span>
+        <span>6.0 hrs</span>
+      </div>
+      <div class="hours-row">
+        <span>Sun, Feb 1</span>
+        <span>5.5 hrs</span>
+      </div>
+      <div class="hours-row">
+        <span>Sat, Jan 31</span>
+        <span>7.0 hrs</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Rewards Tab -->
+  <div class="content hidden" id="tab-rewards">
+    <div class="section-title">🏆 My Rewards</div>
+    
+    <div class="rewards-card">
+      <div class="rewards-label">Season Earnings</div>
+      <div class="rewards-amount">$285</div>
+      <div class="rewards-detail">From upsells & bonuses</div>
+    </div>
+    
+    <div class="my-rank">
+      <div class="rank-number">#4</div>
+      <div class="rank-label">Your Season Ranking (out of 89)</div>
+    </div>
+    
+    <div class="section-title">🎯 Active Challenges</div>
+    
+    <div class="challenge-card">
+      <div class="challenge-header">
+        <div class="challenge-icon">🎁</div>
+        <div class="challenge-title">Blitzen Bundle Bonus</div>
+        <div class="challenge-reward">+$25</div>
+      </div>
+      <div class="challenge-progress">
+        <div class="challenge-bar" style="width: 73%;"></div>
+      </div>
+      <div class="challenge-status">11 of 15 sold tonight — 4 more to go!</div>
+    </div>
+    
+    <div class="challenge-card">
+      <div class="challenge-header">
+        <div class="challenge-icon">⚡</div>
+        <div class="challenge-title">Upsell Streak</div>
+        <div class="challenge-reward">+$5</div>
+      </div>
+      <div class="challenge-progress">
+        <div class="challenge-bar" style="width: 66%;"></div>
+      </div>
+      <div class="challenge-status">2 of 3 in a row — 1 more for instant bonus!</div>
+    </div>
+    
+    <div class="challenge-card">
+      <div class="challenge-header">
+        <div class="challenge-icon">👑</div>
+        <div class="challenge-title">Weekly Champion</div>
+        <div class="challenge-reward">$100</div>
+      </div>
+      <div class="challenge-progress">
+        <div class="challenge-bar" style="width: 85%;"></div>
+      </div>
+      <div class="challenge-status">You're #2 this week — $892 sales. Leader has $1,045.</div>
+    </div>
+    
+    <div class="section-title" style="margin-top: 24px;">💸 Recent Rewards</div>
+    
+    <div class="update-item">
+      <div class="update-icon">💵</div>
+      <div class="update-text">
+        <div class="update-title">+$25 Blitzen Bonus</div>
+        <div class="update-body">Hit 15 bundles on Feb 1</div>
+      </div>
+      <div class="update-time">Feb 1</div>
+    </div>
+    
+    <div class="update-item">
+      <div class="update-icon">💵</div>
+      <div class="update-text">
+        <div class="update-title">+$5 Streak Bonus</div>
+        <div class="update-body">3 upsells in a row</div>
+      </div>
+      <div class="update-time">Jan 31</div>
+    </div>
+    
+    <div class="update-item">
+      <div class="update-icon">💵</div>
+      <div class="update-text">
+        <div class="update-title">+$100 Weekly Champion</div>
+        <div class="update-body">Top seller Jan 20-26</div>
+      </div>
+      <div class="update-time">Jan 27</div>
+    </div>
+  </div>
+  
+  <!-- Updates Tab -->
+  <div class="content hidden" id="tab-updates">
+    <div class="section-title">📢 Updates</div>
+    
+    <div class="update-item">
+      <div class="update-icon">🎉</div>
+      <div class="update-text">
+        <div class="update-title">New Bonus Challenge!</div>
+        <div class="update-body">Sell 15 Blitzen Bundles tonight and earn $25 cash bonus.</div>
+      </div>
+      <div class="update-time">2h ago</div>
+    </div>
+    
+    <div class="update-item">
+      <div class="update-icon">📋</div>
+      <div class="update-text">
+        <div class="update-title">Schedule Updated</div>
+        <div class="update-body">Your shift on Feb 8 moved from 4pm to 5pm.</div>
+      </div>
+      <div class="update-time">Today</div>
+    </div>
+    
+    <div class="update-item">
+      <div class="update-icon">🌟</div>
+      <div class="update-text">
+        <div class="update-title">Great Job!</div>
+        <div class="update-body">You were the #2 seller last night! Keep it up.</div>
+      </div>
+      <div class="update-time">Yesterday</div>
+    </div>
+    
+    <div class="update-item">
+      <div class="update-icon">❄️</div>
+      <div class="update-text">
+        <div class="update-title">Weather Advisory</div>
+        <div class="update-body">Expected high of 42°F Saturday. Dress warm!</div>
+      </div>
+      <div class="update-time">2 days ago</div>
+    </div>
+    
+    <div class="update-item">
+      <div class="update-icon">📢</div>
+      <div class="update-text">
+        <div class="update-title">Team Meeting</div>
+        <div class="update-body">All Photo Tent staff meeting Feb 10 at 4pm before shift.</div>
+      </div>
+      <div class="update-time">3 days ago</div>
+    </div>
+    
+    <div class="update-item">
+      <div class="update-icon">💰</div>
+      <div class="update-text">
+        <div class="update-title">Payday!</div>
+        <div class="update-body">Your paycheck has been deposited. Check Paycor for details.</div>
+      </div>
+      <div class="update-time">Jan 31</div>
+    </div>
+  </div>
+  
+  <script>
+    // Splash screen
+    setTimeout(() => document.getElementById('splash').classList.add('hidden'), 1500);
+    
+    // Tab switching
+    function showTab(tabId) {
+      document.querySelectorAll('.content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.remove('hidden');
+      event.target.classList.add('active');
+    }
+    
+    // Update clock
+    function updateClock() {
+      const now = new Date();
+      let hours = now.getHours();
+      const mins = now.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12 || 12;
+      document.getElementById('currentTime').textContent = `${hours}:${mins} ${ampm}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+    
+    // Toggle clock in/out
+    function toggleClock() {
+      const btn = document.querySelector('.clock-btn');
+      btn.classList.toggle('clocked-in');
+      if (btn.classList.contains('clocked-in')) {
+        btn.innerHTML = `<div class="clock-time" id="currentTime">${document.getElementById('currentTime').textContent}</div><div>TAP TO<br>CLOCK OUT</div>`;
+      } else {
+        btn.innerHTML = `<div class="clock-time" id="currentTime">${document.getElementById('currentTime').textContent}</div><div>TAP TO<br>CLOCK IN</div>`;
+      }
+      updateClock();
+    }
+  </script>
+</body>
+</html>
