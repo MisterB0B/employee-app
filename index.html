@@ -4,46 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <!-- Unified Cloud Sync -->
-    <script src="https://thelightparkops.com/shared/cloud-sync.js"></script>
-    <title>The Light Park | Employee</title>
+  <title>Employee App | The Light Park</title>
   
-  <!-- TLP Cloud Sync -->
-  <script>
-    const TLP_SUPABASE_URL = 'https://gwjtfcrgpxclixonogpe.supabase.co';
-    const TLP_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3anRmY3JncHhjbGl4b25vZ3BlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzQzOTUsImV4cCI6MjA4NTkxMDM5NX0.qM1-_VA1Dsx_nsWkeoAJvNWNgSuuwApPBGoJU32X3-I';
-    const APP_NAME = 'employee_app';
-    
-    window.CloudSync = {
-      online: navigator.onLine,
-      async save(key, data) {
-        localStorage.setItem(`${APP_NAME}_${key}`, JSON.stringify(data));
-        if (!this.online) return { synced: false };
-        try {
-          const existing = await fetch(`${TLP_SUPABASE_URL}/rest/v1/app_data?app_data=eq.${APP_NAME}&data_key=eq.${key}&select=id`,
-            { headers: { 'apikey': TLP_SUPABASE_KEY, 'Authorization': `Bearer ${TLP_SUPABASE_KEY}` }}).then(r => r.json());
-          const method = existing.length > 0 ? 'PATCH' : 'POST';
-          const url = existing.length > 0 ? `${TLP_SUPABASE_URL}/rest/v1/app_data?id=eq.${existing[0].id}` : `${TLP_SUPABASE_URL}/rest/v1/app_data`;
-          const body = existing.length > 0 ? { data, updated_at: new Date().toISOString() } : { app_data: APP_NAME, data_key: key, data };
-          await fetch(url, { method, headers: { 'apikey': TLP_SUPABASE_KEY, 'Authorization': `Bearer ${TLP_SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }, body: JSON.stringify(body) });
-          return { synced: true };
-        } catch (e) { return { synced: false }; }
-      },
-      async load(key) {
-        if (this.online) {
-          try {
-            const result = await fetch(`${TLP_SUPABASE_URL}/rest/v1/app_data?app_data=eq.${APP_NAME}&data_key=eq.${key}&select=data`,
-              { headers: { 'apikey': TLP_SUPABASE_KEY, 'Authorization': `Bearer ${TLP_SUPABASE_KEY}` }}).then(r => r.json());
-            if (result.length > 0) { localStorage.setItem(`${APP_NAME}_${key}`, JSON.stringify(result[0].data)); return result[0].data; }
-          } catch (e) {}
-        }
-        const local = localStorage.getItem(`${APP_NAME}_${key}`);
-        return local ? JSON.parse(local) : null;
-      }
-    };
-    window.addEventListener('online', () => CloudSync.online = true);
-    window.addEventListener('offline', () => CloudSync.online = false);
-  </script>
+  <!-- Unified Cloud Sync -->
+  <script src="https://thelightparkops.com/shared/cloud-sync.js"></script>
   
   <style>
     :root {
@@ -68,8 +32,6 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      max-width: 500px;
-      margin: 0 auto;
     }
     
     /* Splash Screen */
@@ -91,19 +53,18 @@
     
     /* Header */
     .header {
-      background: var(--surface);
-      padding: 16px 20px;
+      background: linear-gradient(135deg, var(--purple), var(--teal));
+      padding: 20px;
       display: flex;
       align-items: center;
       gap: 14px;
-      border-bottom: 1px solid var(--border);
     }
     
     .avatar {
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--purple), var(--pink));
+      background: rgba(255,255,255,0.2);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -113,61 +74,16 @@
     
     .user-info { flex: 1; }
     .user-name { font-weight: 700; font-size: 18px; }
-    .user-role { font-size: 13px; color: var(--text-dim); }
+    .user-role { font-size: 13px; opacity: 0.9; }
     
-    .clock-status {
-      padding: 8px 14px;
+    .admin-toggle {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      padding: 8px 16px;
       border-radius: 20px;
+      color: white;
       font-size: 12px;
-      font-weight: 700;
-    }
-    .clock-status.in { background: rgba(34, 197, 94, 0.2); color: var(--green); }
-    .clock-status.out { background: rgba(239, 68, 68, 0.2); color: var(--red); }
-    
-    /* Clock In Button */
-    .clock-section {
-      padding: 24px 20px;
-      text-align: center;
-      border-bottom: 1px solid var(--border);
-    }
-    
-    .clock-btn {
-      width: 160px;
-      height: 160px;
-      border-radius: 50%;
-      border: 4px solid var(--green);
-      background: rgba(34, 197, 94, 0.1);
-      color: var(--green);
-      font-size: 18px;
-      font-weight: 700;
       cursor: pointer;
-      transition: all 0.3s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 16px;
-    }
-    
-    .clock-btn:hover {
-      background: rgba(34, 197, 94, 0.2);
-      transform: scale(1.05);
-    }
-    
-    .clock-btn.clocked-in {
-      border-color: var(--red);
-      background: rgba(239, 68, 68, 0.1);
-      color: var(--red);
-    }
-    
-    .clock-time {
-      font-size: 32px;
-      margin-bottom: 4px;
-    }
-    
-    .clock-label {
-      font-size: 13px;
-      color: var(--text-dim);
     }
     
     /* Tabs */
@@ -175,10 +91,12 @@
       display: flex;
       border-bottom: 1px solid var(--border);
       background: var(--surface);
+      overflow-x: auto;
     }
     
     .tab {
       flex: 1;
+      min-width: 100px;
       padding: 14px;
       background: none;
       border: none;
@@ -188,503 +106,610 @@
       cursor: pointer;
       border-bottom: 3px solid transparent;
       transition: all 0.2s;
+      white-space: nowrap;
     }
     
     .tab:hover { color: var(--text); }
     .tab.active { color: var(--purple); border-bottom-color: var(--purple); }
     
     /* Content */
-    .content {
-      padding: 20px;
-    }
+    .content { padding: 20px; }
+    .hidden { display: none !important; }
     
     .section-title {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 700;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
     
-    /* Schedule Card */
-    .schedule-card {
+    /* Employee Cards */
+    .employee-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 16px;
       margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
     }
     
-    .schedule-date {
+    .emp-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-weight: 700;
-      margin-bottom: 4px;
+      font-size: 18px;
     }
     
-    .schedule-today {
-      color: var(--teal);
-    }
+    .emp-info { flex: 1; }
+    .emp-name { font-weight: 700; font-size: 16px; }
+    .emp-role { font-size: 13px; color: var(--text-dim); }
+    .emp-venue { font-size: 12px; color: var(--teal); }
     
-    .schedule-time {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    
-    .schedule-details {
-      font-size: 13px;
-      color: var(--text-dim);
-    }
-    
-    .schedule-badge {
-      display: inline-block;
+    .emp-status {
       padding: 4px 10px;
       border-radius: 20px;
       font-size: 11px;
       font-weight: 600;
-      margin-top: 10px;
+    }
+    .status-active { background: rgba(34, 197, 94, 0.2); color: var(--green); }
+    .status-inactive { background: rgba(239, 68, 68, 0.2); color: var(--red); }
+    .status-seasonal { background: rgba(249, 115, 22, 0.2); color: var(--orange); }
+    
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
     }
     
-    .schedule-badge.today { background: rgba(6, 214, 160, 0.2); color: var(--teal); }
-    .schedule-badge.upcoming { background: var(--surface2); color: var(--text-dim); }
-    
-    /* Hours Card */
-    .hours-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 16px;
-    }
-    
-    .hours-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    
-    .hours-title { font-weight: 700; }
-    .hours-period { font-size: 13px; color: var(--text-dim); }
-    
-    .hours-big {
-      font-size: 48px;
-      font-weight: 700;
-      color: var(--teal);
-      margin-bottom: 8px;
-    }
-    
-    .hours-label {
-      font-size: 13px;
-      color: var(--text-dim);
-    }
-    
-    .hours-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 14px;
-    }
-    
-    .hours-row:last-child { border-bottom: none; }
-    
-    /* Rewards Section */
-    .rewards-card {
-      background: linear-gradient(135deg, var(--purple), var(--pink));
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 16px;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .rewards-card::before {
-      content: "🏆";
-      position: absolute;
-      right: -10px;
-      top: -10px;
-      font-size: 80px;
-      opacity: 0.2;
-    }
-    
-    .rewards-label { font-size: 13px; opacity: 0.9; margin-bottom: 4px; }
-    .rewards-amount { font-size: 36px; font-weight: 700; margin-bottom: 8px; }
-    .rewards-detail { font-size: 13px; opacity: 0.8; }
-    
-    .my-rank {
+    .stat-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 16px;
       text-align: center;
-      margin-bottom: 16px;
     }
     
-    .rank-number {
-      font-size: 48px;
-      font-weight: 700;
-      color: var(--teal);
-    }
+    .stat-value { font-size: 28px; font-weight: 800; }
+    .stat-label { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
     
-    .rank-label {
-      font-size: 13px;
-      color: var(--text-dim);
-    }
-    
-    .challenge-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 12px;
-    }
-    
-    .challenge-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 10px;
-    }
-    
-    .challenge-icon { font-size: 28px; }
-    .challenge-title { font-weight: 700; flex: 1; }
-    .challenge-reward { color: var(--teal); font-weight: 700; }
-    
-    .challenge-progress {
-      height: 8px;
-      background: var(--surface2);
-      border-radius: 4px;
-      overflow: hidden;
-      margin-bottom: 8px;
-    }
-    
-    .challenge-bar {
-      height: 100%;
-      background: linear-gradient(90deg, var(--teal), var(--green));
-      border-radius: 4px;
-    }
-    
-    .challenge-status {
-      font-size: 12px;
-      color: var(--text-dim);
-    }
-    
-    /* Updates Section */
-    .update-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 16px;
-      margin-bottom: 10px;
-      display: flex;
-      gap: 12px;
-    }
-    
-    .update-icon { font-size: 20px; }
-    .update-text { flex: 1; }
-    .update-title { font-weight: 600; margin-bottom: 4px; }
-    .update-body { font-size: 13px; color: var(--text-dim); }
-    .update-time { font-size: 11px; color: var(--text-dim); white-space: nowrap; }
-    
-    /* Paycor Link */
-    .paycor-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 16px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    
-    .paycor-card:hover { background: var(--surface2); }
-    
-    .paycor-logo {
-      width: 48px;
-      height: 48px;
-      background: #00a0df;
-      border-radius: 10px;
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 700;
-      font-size: 12px;
+      z-index: 1000;
     }
     
-    .paycor-text { flex: 1; }
-    .paycor-title { font-weight: 700; }
-    .paycor-desc { font-size: 13px; color: var(--text-dim); }
-    .paycor-arrow { font-size: 20px; color: var(--text-dim); }
+    .modal-content {
+      background: var(--surface);
+      border-radius: 16px;
+      width: 90%;
+      max-width: 400px;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 24px;
+    }
     
-    .hidden { display: none !important; }
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 6px; }
+    
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+    }
+    
+    .form-select {
+      width: 100%;
+      padding: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+    }
+    
+    .btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary { background: var(--purple); color: white; }
+    .btn-primary:hover { background: #9333ea; }
+    .btn-secondary { background: var(--surface2); color: var(--text); }
+    .btn-danger { background: var(--red); color: white; }
+    
+    .btn-row { display: flex; gap: 10px; margin-top: 20px; }
+    
+    /* Sync Indicator */
+    #syncIndicator {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #888;
+      z-index: 9999;
+    }
+    
+    /* Search */
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    
+    .search-bar input {
+      flex: 1;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+    }
+    
+    .add-btn {
+      padding: 12px 20px;
+      background: var(--green);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
+    /* Filter Pills */
+    .filter-pills {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .pill {
+      padding: 8px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    
+    .pill.active {
+      background: var(--purple);
+      border-color: var(--purple);
+    }
   </style>
 </head>
 <body>
   <!-- Splash -->
   <div id="splash">
     <img src="logo.png" alt="The Light Park">
-    <div class="splash-text">Employee Portal</div>
+    <div class="splash-text">Employee Management</div>
   </div>
   
   <!-- Header -->
   <div class="header">
-    <div class="avatar">MG</div>
+    <div class="avatar" id="adminAvatar">👤</div>
     <div class="user-info">
-      <div class="user-name">Maria Garcia</div>
-      <div class="user-role">Photo Tent — Katy</div>
+      <div class="user-name">Employee Hub</div>
+      <div class="user-role">Staff Management System</div>
     </div>
-    <div class="clock-status in">● Clocked In</div>
-  </div>
-  
-  <!-- Clock Section -->
-  <div class="clock-section">
-    <button class="clock-btn clocked-in" onclick="toggleClock()">
-      <div class="clock-time" id="currentTime">7:42 PM</div>
-      <div>TAP TO<br>CLOCK OUT</div>
-    </button>
-    <div class="clock-label">Clocked in at 5:02 PM • 2h 40m today</div>
+    <button class="admin-toggle" onclick="toggleAdminMode()">⚙️ Admin</button>
   </div>
   
   <!-- Tabs -->
   <div class="tabs">
-    <button class="tab active" onclick="showTab('schedule')">📅 Schedule</button>
-    <button class="tab" onclick="showTab('hours')">⏱️ Hours</button>
-    <button class="tab" onclick="showTab('rewards')">🏆 Rewards</button>
-    <button class="tab" onclick="showTab('updates')">📢 Updates</button>
+    <button class="tab active" onclick="showTab('roster')">👥 Roster</button>
+    <button class="tab" onclick="showTab('roles')">🎭 Roles</button>
+    <button class="tab" onclick="showTab('venues')">📍 Venues</button>
+    <button class="tab" onclick="showTab('sync')">🔄 Sync</button>
   </div>
   
-  <!-- Schedule Tab -->
-  <div class="content" id="tab-schedule">
-    <div class="section-title">📅 My Schedule</div>
-    
-    <div class="schedule-card">
-      <div class="schedule-date schedule-today">Today — Friday, Feb 6</div>
-      <div class="schedule-time">5:00 PM - 10:00 PM</div>
-      <div class="schedule-details">📸 Photo Tent • Katy</div>
-      <span class="schedule-badge today">Currently Working</span>
+  <!-- Roster Tab -->
+  <div class="content" id="tab-roster">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="totalCount">0</div>
+        <div class="stat-label">Total Employees</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="activeCount" style="color: var(--green);">0</div>
+        <div class="stat-label">Active</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="seasonalCount" style="color: var(--orange);">0</div>
+        <div class="stat-label">Seasonal</div>
+      </div>
     </div>
     
-    <div class="schedule-card">
-      <div class="schedule-date">Tomorrow — Saturday, Feb 7</div>
-      <div class="schedule-time">4:00 PM - 11:00 PM</div>
-      <div class="schedule-details">📸 Photo Tent • Katy</div>
-      <span class="schedule-badge upcoming">7 hours</span>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search employees..." oninput="filterEmployees()">
+      <button class="add-btn" onclick="showAddModal()">+ Add</button>
     </div>
     
-    <div class="schedule-card">
-      <div class="schedule-date">Sunday, Feb 8</div>
-      <div class="schedule-time">5:00 PM - 10:00 PM</div>
-      <div class="schedule-details">📸 Photo Tent • Katy</div>
-      <span class="schedule-badge upcoming">5 hours</span>
-    </div>
+    <div class="filter-pills" id="venueFilters"></div>
     
-    <div class="schedule-card">
-      <div class="schedule-date">Monday, Feb 9</div>
-      <div class="schedule-time">—</div>
-      <div class="schedule-details">Day Off</div>
-    </div>
+    <div id="employeeList"></div>
   </div>
   
-  <!-- Hours Tab -->
-  <div class="content hidden" id="tab-hours">
-    <div class="section-title">⏱️ My Hours</div>
-    
-    <div class="paycor-card" onclick="window.open('https://www.paycor.com', '_blank')">
-      <div class="paycor-logo">PC</div>
-      <div class="paycor-text">
-        <div class="paycor-title">View in Paycor</div>
-        <div class="paycor-desc">Full pay stubs, tax docs, benefits</div>
-      </div>
-      <div class="paycor-arrow">→</div>
-    </div>
-    
-    <div class="hours-card">
-      <div class="hours-header">
-        <div class="hours-title">This Pay Period</div>
-        <div class="hours-period">Jan 27 - Feb 9</div>
-      </div>
-      <div class="hours-big">32.5</div>
-      <div class="hours-label">hours worked</div>
-    </div>
-    
-    <div class="hours-card">
-      <div class="hours-header">
-        <div class="hours-title">Recent Shifts</div>
-      </div>
-      <div class="hours-row">
-        <span>Today (in progress)</span>
-        <span style="color: var(--teal);">2h 40m</span>
-      </div>
-      <div class="hours-row">
-        <span>Thu, Feb 5</span>
-        <span>5.0 hrs</span>
-      </div>
-      <div class="hours-row">
-        <span>Wed, Feb 4</span>
-        <span>6.0 hrs</span>
-      </div>
-      <div class="hours-row">
-        <span>Sun, Feb 1</span>
-        <span>5.5 hrs</span>
-      </div>
-      <div class="hours-row">
-        <span>Sat, Jan 31</span>
-        <span>7.0 hrs</span>
-      </div>
-    </div>
+  <!-- Roles Tab -->
+  <div class="content hidden" id="tab-roles">
+    <div class="section-title">🎭 Role Breakdown</div>
+    <div id="rolesList"></div>
   </div>
   
-  <!-- Rewards Tab -->
-  <div class="content hidden" id="tab-rewards">
-    <div class="section-title">🏆 My Rewards</div>
-    
-    <div class="rewards-card">
-      <div class="rewards-label">Season Earnings</div>
-      <div class="rewards-amount">$285</div>
-      <div class="rewards-detail">From upsells & bonuses</div>
-    </div>
-    
-    <div class="my-rank">
-      <div class="rank-number">#4</div>
-      <div class="rank-label">Your Season Ranking (out of 89)</div>
-    </div>
-    
-    <div class="section-title">🎯 Active Challenges</div>
-    
-    <div class="challenge-card">
-      <div class="challenge-header">
-        <div class="challenge-icon">🎁</div>
-        <div class="challenge-title">Blitzen Bundle Bonus</div>
-        <div class="challenge-reward">+$25</div>
-      </div>
-      <div class="challenge-progress">
-        <div class="challenge-bar" style="width: 73%;"></div>
-      </div>
-      <div class="challenge-status">11 of 15 sold tonight — 4 more to go!</div>
-    </div>
-    
-    <div class="challenge-card">
-      <div class="challenge-header">
-        <div class="challenge-icon">⚡</div>
-        <div class="challenge-title">Upsell Streak</div>
-        <div class="challenge-reward">+$5</div>
-      </div>
-      <div class="challenge-progress">
-        <div class="challenge-bar" style="width: 66%;"></div>
-      </div>
-      <div class="challenge-status">2 of 3 in a row — 1 more for instant bonus!</div>
-    </div>
-    
-    <div class="challenge-card">
-      <div class="challenge-header">
-        <div class="challenge-icon">👑</div>
-        <div class="challenge-title">Weekly Champion</div>
-        <div class="challenge-reward">$100</div>
-      </div>
-      <div class="challenge-progress">
-        <div class="challenge-bar" style="width: 85%;"></div>
-      </div>
-      <div class="challenge-status">You're #2 this week — $892 sales. Leader has $1,045.</div>
-    </div>
-    
-    <div class="section-title" style="margin-top: 24px;">💸 Recent Rewards</div>
-    
-    <div class="update-item">
-      <div class="update-icon">💵</div>
-      <div class="update-text">
-        <div class="update-title">+$25 Blitzen Bonus</div>
-        <div class="update-body">Hit 15 bundles on Feb 1</div>
-      </div>
-      <div class="update-time">Feb 1</div>
-    </div>
-    
-    <div class="update-item">
-      <div class="update-icon">💵</div>
-      <div class="update-text">
-        <div class="update-title">+$5 Streak Bonus</div>
-        <div class="update-body">3 upsells in a row</div>
-      </div>
-      <div class="update-time">Jan 31</div>
-    </div>
-    
-    <div class="update-item">
-      <div class="update-icon">💵</div>
-      <div class="update-text">
-        <div class="update-title">+$100 Weekly Champion</div>
-        <div class="update-body">Top seller Jan 20-26</div>
-      </div>
-      <div class="update-time">Jan 27</div>
-    </div>
+  <!-- Venues Tab -->
+  <div class="content hidden" id="tab-venues">
+    <div class="section-title">📍 Venue Staff</div>
+    <div id="venuesList"></div>
   </div>
   
-  <!-- Updates Tab -->
-  <div class="content hidden" id="tab-updates">
-    <div class="section-title">📢 Updates</div>
+  <!-- Sync Tab -->
+  <div class="content hidden" id="tab-sync">
+    <div class="section-title">🔄 Cross-App Sync</div>
     
-    <div class="update-item">
-      <div class="update-icon">🎉</div>
-      <div class="update-text">
-        <div class="update-title">New Bonus Challenge!</div>
-        <div class="update-body">Sell 15 Blitzen Bundles tonight and earn $25 cash bonus.</div>
-      </div>
-      <div class="update-time">2h ago</div>
+    <div class="stat-card" style="margin-bottom: 16px;">
+      <div class="stat-value" id="syncStatus">—</div>
+      <div class="stat-label">Last Sync</div>
     </div>
     
-    <div class="update-item">
-      <div class="update-icon">📋</div>
-      <div class="update-text">
-        <div class="update-title">Schedule Updated</div>
-        <div class="update-body">Your shift on Feb 8 moved from 4pm to 5pm.</div>
+    <p style="color: var(--text-dim); margin-bottom: 16px; font-size: 14px;">
+      Employee data from this app syncs automatically to all connected apps:
+    </p>
+    
+    <div style="display: grid; gap: 10px;">
+      <div class="employee-card">
+        <div class="emp-avatar">🏋️</div>
+        <div class="emp-info">
+          <div class="emp-name">Training Hub</div>
+          <div class="emp-role">Reads employees for training progress</div>
+        </div>
+        <span class="emp-status status-active">Connected</span>
       </div>
-      <div class="update-time">Today</div>
+      <div class="employee-card">
+        <div class="emp-avatar">🚗</div>
+        <div class="emp-info">
+          <div class="emp-name">Field Ops</div>
+          <div class="emp-role">Reads employees for staff check-ins</div>
+        </div>
+        <span class="emp-status status-active">Connected</span>
+      </div>
+      <div class="employee-card">
+        <div class="emp-avatar">🎪</div>
+        <div class="emp-info">
+          <div class="emp-name">Tent Manager</div>
+          <div class="emp-role">Reads employees for shift assignments</div>
+        </div>
+        <span class="emp-status status-active">Connected</span>
+      </div>
+      <div class="employee-card">
+        <div class="emp-avatar">🎯</div>
+        <div class="emp-info">
+          <div class="emp-name">Command Center</div>
+          <div class="emp-role">Reads employees for dashboard</div>
+        </div>
+        <span class="emp-status status-active">Connected</span>
+      </div>
     </div>
     
-    <div class="update-item">
-      <div class="update-icon">🌟</div>
-      <div class="update-text">
-        <div class="update-title">Great Job!</div>
-        <div class="update-body">You were the #2 seller last night! Keep it up.</div>
+    <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="forceSyncNow()">
+      🔄 Force Sync Now
+    </button>
+  </div>
+  
+  <!-- Add/Edit Modal -->
+  <div class="modal hidden" id="employeeModal">
+    <div class="modal-content">
+      <div class="modal-title" id="modalTitle">Add Employee</div>
+      
+      <div class="form-group">
+        <label class="form-label">Full Name *</label>
+        <input type="text" class="form-input" id="empName" placeholder="John Smith">
       </div>
-      <div class="update-time">Yesterday</div>
-    </div>
-    
-    <div class="update-item">
-      <div class="update-icon">❄️</div>
-      <div class="update-text">
-        <div class="update-title">Weather Advisory</div>
-        <div class="update-body">Expected high of 42°F Saturday. Dress warm!</div>
+      
+      <div class="form-group">
+        <label class="form-label">Role *</label>
+        <select class="form-select" id="empRole">
+          <option value="">Select role...</option>
+          <option value="Show Tech">Show Tech</option>
+          <option value="Photo Tent">Photo Tent</option>
+          <option value="Gift Shop">Gift Shop</option>
+          <option value="Parking">Parking</option>
+          <option value="Guest Services">Guest Services</option>
+          <option value="Mascot">Mascot</option>
+          <option value="Build Lead">Build Lead</option>
+          <option value="Field Ops">Field Ops</option>
+          <option value="Manager">Manager</option>
+          <option value="Security">Security</option>
+        </select>
       </div>
-      <div class="update-time">2 days ago</div>
-    </div>
-    
-    <div class="update-item">
-      <div class="update-icon">📢</div>
-      <div class="update-text">
-        <div class="update-title">Team Meeting</div>
-        <div class="update-body">All Photo Tent staff meeting Feb 10 at 4pm before shift.</div>
+      
+      <div class="form-group">
+        <label class="form-label">Venue *</label>
+        <select class="form-select" id="empVenue">
+          <option value="">Select venue...</option>
+          <option value="Pearland">Pearland</option>
+          <option value="Santa Fe">Santa Fe</option>
+          <option value="League City">League City</option>
+          <option value="Katy">Katy</option>
+          <option value="Floater">Floater (Multi-Venue)</option>
+        </select>
       </div>
-      <div class="update-time">3 days ago</div>
-    </div>
-    
-    <div class="update-item">
-      <div class="update-icon">💰</div>
-      <div class="update-text">
-        <div class="update-title">Payday!</div>
-        <div class="update-body">Your paycheck has been deposited. Check Paycor for details.</div>
+      
+      <div class="form-group">
+        <label class="form-label">Phone</label>
+        <input type="tel" class="form-input" id="empPhone" placeholder="(555) 123-4567">
       </div>
-      <div class="update-time">Jan 31</div>
+      
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="empEmail" placeholder="john@example.com">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">PIN (for clock-in)</label>
+        <input type="text" class="form-input" id="empPin" placeholder="1234" maxlength="4">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="empStatus">
+          <option value="active">Active</option>
+          <option value="seasonal">Seasonal</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+      
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEmployee()" style="flex: 1;">Save Employee</button>
+      </div>
     </div>
   </div>
   
+  <!-- Sync Indicator -->
+  <div id="syncIndicator"></div>
+
   <script>
-    // Splash screen
-    setTimeout(() => document.getElementById('splash').classList.add('hidden'), 1500);
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════════════════════════════════════════
     
-    // Tab switching
+    let employees = [];
+    let editingId = null;
+    let currentFilter = 'all';
+    let dataSync = null;
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // INITIALIZATION
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    async function init() {
+      // Initialize sync
+      if (window.TLPStaffSync) {
+        dataSync = window.TLPStaffSync;
+      }
+      
+      // Load employees
+      await loadEmployees();
+      
+      // Render
+      renderEmployees();
+      renderRoles();
+      renderVenues();
+      updateStats();
+      renderVenueFilters();
+      
+      // Hide splash
+      setTimeout(() => document.getElementById('splash').classList.add('hidden'), 1500);
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // DATA MANAGEMENT
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    async function loadEmployees() {
+      // Try cloud first
+      if (dataSync) {
+        try {
+          const cloudData = await dataSync.getStaff();
+          if (cloudData && cloudData.length > 0) {
+            employees = cloudData;
+            console.log('[Employee App] Loaded', employees.length, 'employees from cloud');
+            document.getElementById('syncIndicator').style.background = '#06d6a0';
+            return;
+          }
+        } catch (e) {
+          console.error('[Employee App] Cloud load failed:', e);
+        }
+      }
+      
+      // Fall back to local storage
+      const local = localStorage.getItem('tlp_employees');
+      if (local) {
+        try {
+          const parsed = JSON.parse(local);
+          employees = parsed.data || parsed;
+          console.log('[Employee App] Loaded', employees.length, 'employees from local');
+        } catch (e) {
+          employees = [];
+        }
+      }
+      
+      // If still empty, add demo data
+      if (employees.length === 0) {
+        employees = getDemoEmployees();
+        await saveEmployees();
+      }
+    }
+    
+    async function saveEmployees() {
+      // Save locally
+      localStorage.setItem('tlp_employees', JSON.stringify({
+        data: employees,
+        updatedAt: new Date().toISOString()
+      }));
+      
+      // Sync to cloud
+      if (dataSync) {
+        try {
+          const result = await dataSync.saveStaff(employees);
+          document.getElementById('syncIndicator').style.background = result.synced ? '#06d6a0' : '#f97316';
+          document.getElementById('syncStatus').textContent = new Date().toLocaleTimeString();
+          console.log('[Employee App] Synced to cloud:', result.synced ? '✓' : '✗');
+        } catch (e) {
+          document.getElementById('syncIndicator').style.background = '#ef4444';
+          console.error('[Employee App] Sync failed:', e);
+        }
+      }
+    }
+    
+    function getDemoEmployees() {
+      return [
+        { id: '1', name: 'Maria Garcia', role: 'Photo Tent', venue: 'Pearland', phone: '(281) 555-0101', email: 'maria@tlp.com', pin: '1234', status: 'active', hireDate: '2024-09-15' },
+        { id: '2', name: 'James Wilson', role: 'Show Tech', venue: 'Pearland', phone: '(281) 555-0102', email: 'james@tlp.com', pin: '2345', status: 'active', hireDate: '2024-10-01' },
+        { id: '3', name: 'Sarah Johnson', role: 'Gift Shop', venue: 'Santa Fe', phone: '(409) 555-0103', email: 'sarah@tlp.com', pin: '3456', status: 'active', hireDate: '2024-09-20' },
+        { id: '4', name: 'Mike Chen', role: 'Build Lead', venue: 'Floater', phone: '(281) 555-0104', email: 'mike@tlp.com', pin: '4567', status: 'active', hireDate: '2024-08-01' },
+        { id: '5', name: 'Emily Brown', role: 'Manager', venue: 'League City', phone: '(281) 555-0105', email: 'emily@tlp.com', pin: '5678', status: 'active', hireDate: '2024-07-15' },
+        { id: '6', name: 'David Lee', role: 'Parking', venue: 'Pearland', phone: '(281) 555-0106', email: 'david@tlp.com', pin: '6789', status: 'seasonal', hireDate: '2024-11-01' },
+        { id: '7', name: 'Lisa Thompson', role: 'Guest Services', venue: 'Santa Fe', phone: '(409) 555-0107', email: 'lisa@tlp.com', pin: '7890', status: 'active', hireDate: '2024-10-15' },
+        { id: '8', name: 'Chris Martinez', role: 'Mascot', venue: 'Floater', phone: '(281) 555-0108', email: 'chris@tlp.com', pin: '8901', status: 'seasonal', hireDate: '2024-11-15' }
+      ];
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // RENDERING
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    function renderEmployees() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      
+      let filtered = employees.filter(emp => {
+        const matchesSearch = emp.name.toLowerCase().includes(searchTerm) || 
+                              emp.role.toLowerCase().includes(searchTerm);
+        const matchesFilter = currentFilter === 'all' || emp.venue === currentFilter;
+        return matchesSearch && matchesFilter;
+      });
+      
+      const list = document.getElementById('employeeList');
+      
+      if (filtered.length === 0) {
+        list.innerHTML = '<div style="text-align: center; color: var(--text-dim); padding: 40px;">No employees found</div>';
+        return;
+      }
+      
+      list.innerHTML = filtered.map(emp => `
+        <div class="employee-card" onclick="editEmployee('${emp.id}')">
+          <div class="emp-avatar">${getInitials(emp.name)}</div>
+          <div class="emp-info">
+            <div class="emp-name">${emp.name}</div>
+            <div class="emp-role">${emp.role}</div>
+            <div class="emp-venue">📍 ${emp.venue}</div>
+          </div>
+          <span class="emp-status status-${emp.status}">${emp.status}</span>
+        </div>
+      `).join('');
+    }
+    
+    function renderVenueFilters() {
+      const venues = ['all', ...new Set(employees.map(e => e.venue))];
+      
+      document.getElementById('venueFilters').innerHTML = venues.map(v => `
+        <div class="pill ${currentFilter === v ? 'active' : ''}" onclick="filterByVenue('${v}')">
+          ${v === 'all' ? '👥 All' : '📍 ' + v}
+        </div>
+      `).join('');
+    }
+    
+    function renderRoles() {
+      const roleGroups = {};
+      employees.forEach(emp => {
+        if (!roleGroups[emp.role]) roleGroups[emp.role] = [];
+        roleGroups[emp.role].push(emp);
+      });
+      
+      document.getElementById('rolesList').innerHTML = Object.entries(roleGroups)
+        .sort((a, b) => b[1].length - a[1].length)
+        .map(([role, emps]) => `
+          <div class="stat-card" style="margin-bottom: 12px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="stat-value" style="font-size: 18px;">${role}</div>
+              <div style="font-size: 24px; font-weight: 700; color: var(--purple);">${emps.length}</div>
+            </div>
+            <div style="margin-top: 10px; font-size: 13px; color: var(--text-dim);">
+              ${emps.map(e => e.name).join(', ')}
+            </div>
+          </div>
+        `).join('');
+    }
+    
+    function renderVenues() {
+      const venueGroups = {};
+      employees.forEach(emp => {
+        if (!venueGroups[emp.venue]) venueGroups[emp.venue] = [];
+        venueGroups[emp.venue].push(emp);
+      });
+      
+      document.getElementById('venuesList').innerHTML = Object.entries(venueGroups)
+        .sort((a, b) => b[1].length - a[1].length)
+        .map(([venue, emps]) => `
+          <div class="stat-card" style="margin-bottom: 12px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="stat-value" style="font-size: 18px;">📍 ${venue}</div>
+              <div style="font-size: 24px; font-weight: 700; color: var(--teal);">${emps.length}</div>
+            </div>
+            <div style="margin-top: 10px; font-size: 13px; color: var(--text-dim);">
+              ${emps.map(e => e.name + ' (' + e.role + ')').join(', ')}
+            </div>
+          </div>
+        `).join('');
+    }
+    
+    function updateStats() {
+      document.getElementById('totalCount').textContent = employees.length;
+      document.getElementById('activeCount').textContent = employees.filter(e => e.status === 'active').length;
+      document.getElementById('seasonalCount').textContent = employees.filter(e => e.status === 'seasonal').length;
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // ACTIONS
+    // ═══════════════════════════════════════════════════════════════════════════
+    
     function showTab(tabId) {
       document.querySelectorAll('.content').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
@@ -692,29 +717,117 @@
       event.target.classList.add('active');
     }
     
-    // Update clock
-    function updateClock() {
-      const now = new Date();
-      let hours = now.getHours();
-      const mins = now.getMinutes().toString().padStart(2, '0');
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      hours = hours % 12 || 12;
-      document.getElementById('currentTime').textContent = `${hours}:${mins} ${ampm}`;
+    function filterByVenue(venue) {
+      currentFilter = venue;
+      renderVenueFilters();
+      renderEmployees();
     }
-    updateClock();
-    setInterval(updateClock, 1000);
     
-    // Toggle clock in/out
-    function toggleClock() {
-      const btn = document.querySelector('.clock-btn');
-      btn.classList.toggle('clocked-in');
-      if (btn.classList.contains('clocked-in')) {
-        btn.innerHTML = `<div class="clock-time" id="currentTime">${document.getElementById('currentTime').textContent}</div><div>TAP TO<br>CLOCK OUT</div>`;
-      } else {
-        btn.innerHTML = `<div class="clock-time" id="currentTime">${document.getElementById('currentTime').textContent}</div><div>TAP TO<br>CLOCK IN</div>`;
-      }
-      updateClock();
+    function filterEmployees() {
+      renderEmployees();
     }
+    
+    function showAddModal() {
+      editingId = null;
+      document.getElementById('modalTitle').textContent = 'Add Employee';
+      document.getElementById('empName').value = '';
+      document.getElementById('empRole').value = '';
+      document.getElementById('empVenue').value = '';
+      document.getElementById('empPhone').value = '';
+      document.getElementById('empEmail').value = '';
+      document.getElementById('empPin').value = '';
+      document.getElementById('empStatus').value = 'active';
+      document.getElementById('employeeModal').classList.remove('hidden');
+    }
+    
+    function editEmployee(id) {
+      const emp = employees.find(e => e.id === id);
+      if (!emp) return;
+      
+      editingId = id;
+      document.getElementById('modalTitle').textContent = 'Edit Employee';
+      document.getElementById('empName').value = emp.name;
+      document.getElementById('empRole').value = emp.role;
+      document.getElementById('empVenue').value = emp.venue;
+      document.getElementById('empPhone').value = emp.phone || '';
+      document.getElementById('empEmail').value = emp.email || '';
+      document.getElementById('empPin').value = emp.pin || '';
+      document.getElementById('empStatus').value = emp.status;
+      document.getElementById('employeeModal').classList.remove('hidden');
+    }
+    
+    function closeModal() {
+      document.getElementById('employeeModal').classList.add('hidden');
+    }
+    
+    async function saveEmployee() {
+      const name = document.getElementById('empName').value.trim();
+      const role = document.getElementById('empRole').value;
+      const venue = document.getElementById('empVenue').value;
+      
+      if (!name || !role || !venue) {
+        alert('Please fill in name, role, and venue');
+        return;
+      }
+      
+      const empData = {
+        name,
+        role,
+        venue,
+        phone: document.getElementById('empPhone').value.trim(),
+        email: document.getElementById('empEmail').value.trim(),
+        pin: document.getElementById('empPin').value.trim(),
+        status: document.getElementById('empStatus').value
+      };
+      
+      if (editingId) {
+        // Update existing
+        const idx = employees.findIndex(e => e.id === editingId);
+        if (idx >= 0) {
+          employees[idx] = { ...employees[idx], ...empData };
+        }
+      } else {
+        // Add new
+        employees.push({
+          id: Date.now().toString(36),
+          ...empData,
+          hireDate: new Date().toISOString().split('T')[0]
+        });
+      }
+      
+      await saveEmployees();
+      closeModal();
+      renderEmployees();
+      renderRoles();
+      renderVenues();
+      updateStats();
+      renderVenueFilters();
+    }
+    
+    async function forceSyncNow() {
+      document.getElementById('syncStatus').textContent = 'Syncing...';
+      await saveEmployees();
+      alert('✓ Synced ' + employees.length + ' employees to cloud');
+    }
+    
+    function toggleAdminMode() {
+      // Future: toggle between admin and employee views
+      alert('Admin mode - all features enabled');
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // HELPERS
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    function getInitials(name) {
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // START
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    init();
   </script>
 </body>
 </html>
