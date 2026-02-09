@@ -6,8 +6,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Employee App | The Light Park</title>
   
-  <!-- Unified Cloud Sync -->
+  <!-- Unified Cloud Sync & Permissions -->
   <script src="https://thelightparkops.com/shared/cloud-sync.js"></script>
+  <script src="https://thelightparkops.com/shared/auth.js"></script>
+  <script src="https://thelightparkops.com/shared/permissions.js"></script>
   
   <style>
     :root {
@@ -520,6 +522,11 @@
     // ═══════════════════════════════════════════════════════════════════════════
     
     async function init() {
+      // Log access (Employee App is accessible to everyone)
+      if (typeof TLPPermissions !== 'undefined') {
+        TLPPermissions.logAction('view', 'Accessed Employee App');
+      }
+      
       // Initialize sync
       if (window.TLPStaffSync) {
         dataSync = window.TLPStaffSync;
