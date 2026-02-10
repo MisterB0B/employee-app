@@ -316,6 +316,7 @@
       border-color: var(--purple);
     }
   </style>
+  <script src="supabase-sync.js"></script>
 </head>
 <body>
   <!-- Splash -->
@@ -325,7 +326,10 @@
   </div>
   
   <!-- Header -->
-  <div class="header">
+  <div class="header" style="position: relative; padding-top: 50px;">
+      <a href="https://thelightparkops.com" style="position: absolute; top: 20px; left: 20px; color: #a855f7; text-decoration: none; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: all 0.2s; z-index: 10;" onmouseover="this.style.color='#06d6a0'" onmouseout="this.style.color='#a855f7'">
+        ← Dashboard
+      </a>
     <div class="avatar" id="adminAvatar">👤</div>
     <div class="user-info">
       <div class="user-name">Employee Hub</div>
